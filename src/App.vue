@@ -2,9 +2,9 @@
 </script>
 
 <template>
-<div>
-  游戏初始化
-</div>
+  <div id="root">
+    <router-view />
+  </div>
 </template>
 
 <style scoped>
