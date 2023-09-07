@@ -18,20 +18,23 @@ const onTouchStart = (event) => {
 };
 
 const onTouchMove = (event) => {
-  let current = event.touches[0].clientY;
-  let delta = current - startY;
-  if (delta < 0) {
-    console.log(delta,'向上滑动')
-  }
+  // let current = event.touches[0].clientY;
+  // let delta = current - startY;
+  // if (delta < 0) {
+  //   console.log(delta,'向上滑动',)
+  // }
   console.log('onTouchMove',event)
-  console.log('event.touches[0].clientY',event.toucshes[0].clientY)
+  console.log('event.touches[0].clientY',event.touches[0].clientY)
   console.log('startY',startY)
   // 如果btnClassHeight为60vh，说明按钮容器是关闭的，不能向上滑动，可以正常向下滑动
-  if (event.touches[0].clientY < startY&&!isDragging) return;
+  if (btnClassHeight.value === '60vh'&& event.touches[0].clientY < startY&&!isDragging) return;
+
   event.preventDefault();
+
   const touch = event.touches[0];
   const deltaY = touch.clientY - currentY;
   currentY = touch.clientY;
+
   // 更新按钮容器的高度和位置
   btnClassHeight.value = `calc(${btnClassHeight.value} + ${deltaY}px)`;
   btnClassTop.value = `calc(${btnClassTop.value} + ${deltaY}px)`;
