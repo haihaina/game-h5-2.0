@@ -1,5 +1,43 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
+
+// 移动端图片切换
+let backgroundImageInterval = null;
+let currentImageIndex = ref(0);
+let currentImageUrl = ref(`http://img.haihaina.cn/image/video_000/video_0.jpg`);
+let nextImageUrl = ref(`http://img.haihaina.cn/image/video_000/video_1.jpg`);
+const preloadNextImage = async () => {
+  const image = new Image();
+  await new Promise((resolve) => {
+    image.onload = resolve;
+    image.src = nextImageUrl.value;
+  });
+};
+
+const startBackgroundAnimation = async () => {
+  while (true) {
+    await preloadNextImage();
+    currentImageUrl.value = nextImageUrl.value;
+    currentImageIndex.value++;
+    if (currentImageIndex.value > 103) {
+      currentImageIndex.value = 0;
+    }
+    nextImageUrl.value = `http://img.haihaina.cn/image/video_000/video_${currentImageIndex.value}.jpg`;
+
+    await new Promise((resolve) => setTimeout(resolve, 35)); // 调整每一帧的时间间隔
+  }
+};
+
+const stopBackgroundAnimation = () => {
+  clearInterval(backgroundImageInterval);
+};
+onMounted(() => {
+  startBackgroundAnimation();
+});
+
+onUnmounted(() => {
+  stopBackgroundAnimation();
+});
 let ruleForm = reactive({
   username: '',
   password: ''
@@ -23,11 +61,11 @@ const onTouchMove = (event) => {
   // if (delta < 0) {
   //   console.log(delta,'向上滑动',)
   // }
-  console.log('onTouchMove',event)
-  console.log('event.touches[0].clientY',event.touches[0].clientY)
-  console.log('startY',startY)
+  console.log('onTouchMove', event)
+  console.log('event.touches[0].clientY', event.touches[0].clientY)
+  console.log('startY', startY)
   // 如果btnClassHeight为60vh，说明按钮容器是关闭的，不能向上滑动，可以正常向下滑动
-  if (btnClassHeight.value === '60vh'&& event.touches[0].clientY < startY&&!isDragging) return;
+  if (btnClassHeight.value === '60vh' && event.touches[0].clientY < startY && !isDragging) return;
 
   event.preventDefault();
 
@@ -45,11 +83,11 @@ const onTouchEnd = (event) => {
 
   // 根据下拉距离判断是否打开按钮容器
   const distance = currentY - startY;
-  console.log(distance,'distance')
+  console.log(distance, 'distance')
   if (distance > 50) {
     // 打开按钮容器
-    // btnClassHeight.value = '60vh'; // 设置为打开时的高度
-    // btnClassTop.value = '40vh'; // 设置为打开时的top值
+    btnClassHeight.value = '60vh'; // 设置为打开时的高度
+    btnClassTop.value = '40vh'; // 设置为打开时的top值
   } else {
     // 关闭按钮容器
     btnClassHeight.value = '60vh'; // 设置为关闭时的高度
@@ -65,11 +103,11 @@ const onSubmit = (values) => {
 <template>
   <div class="login">
     <div class="video-container">
-      <video autoplay muted loop>
+      <video id="video" autoplay muted loop :poster="currentImageUrl">
         <source src="../../assets/images/login_bg.mp4" type="video/mp4">
+        <source src="../../assets/images/login_bg.mp4" type="video/webm">
       </video>
     </div>
-    <div class="fallback"></div>
     <div class="btn-class" :style="{ top: btnClassTop, height: btnClassHeight }" @touchstart="onTouchStart"
       @touchmove="onTouchMove" @touchend="onTouchEnd">
       <!-- 登录这里一个账号一个密码一个 -->
@@ -133,7 +171,7 @@ video {
 }
 
 .fallback {
-  background: url('http://img.haihaina.cn/image/video_000/video_000.jpg') no-repeat;
+  // background: url('http://img.haihaina.cn/image/video_000/video_000.jpg') no-repeat;
   background-size: cover;
   background-position: center;
   width: 100%;
@@ -142,5 +180,6 @@ video {
   top: 0;
   left: 0;
   z-index: -1;
+  transition: background-image 0.5s ease;
 }
 </style>
